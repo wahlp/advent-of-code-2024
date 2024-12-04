@@ -1,58 +1,46 @@
+def transpose(lst: list[list[str]]):
+    return [''.join(x) for x in zip(*lst)]
+
+
+def mirror(lst: list[list[str]]):
+    return [''.join(reversed(x)) for x in lst] 
+
+
+def get_45deg_2d_list(lst: list[list[str]]):
+    unused_char = ' '
+    new_lst = []
+    for i, row in enumerate(lst):
+        new_row = ''.join([
+            *[unused_char for _ in range(i)],
+            row,
+            *[unused_char for _ in range(len(lst) - i)]
+        ])
+        new_lst.append(new_row)
+    
+    new_lst = [row.replace(unused_char, '') for row in transpose(new_lst)]
+    return new_lst
+
+
 with open('day4/input.txt') as f:
     data = f.read().splitlines()
 
-def check_cell(data: list[list[str]], row: int, col: int):
-    # count the number of XMAS occurrences starting on a coordinate position
-    # strategy:
-    # only look for X's to start the sequence
-    # one X could start multiple XMAS occurrences
-    if data[row][col] != 'X':
-        return 0
-
-    # find valid directions to check
-    # there are 2 horizontal, 2 vertical, 4 diagonal
-    # go clockwise from 12 o clock
-    directions = [
-        (0, -1),    # up
-        (1, -1),    # up right
-        (1, 0),     # right
-        (1, 1),     # down right   
-        (0, 1),     # down
-        (-1, 1),    # down left
-        (-1, 0),    # left
-        (-1, -1)    # up left
-    ]
-
-    count = 0
-    for direction in directions:
-        # make sure going in that direction doesnt land us out of bounds
-        if not validate_direction(data, row, col, direction):
-            continue
-        
-        # this direction is now safe to check
-        xpos, ypos = col, row
-        s = 'X'
-        for _ in range(3):
-            dx, dy = direction
-            xpos += dx
-            ypos += dy
-            s += data[ypos][xpos]
-        if s == "XMAS":
-            # print(f'found XMAS at {row = }, {col = }, {direction = }')
-            count += 1
-    
-    return count
-
-def validate_direction(data, row, col, direction):
-    dx, dy = tuple(x * 3 for x in direction)
-    return (
-        0 <= row + dy < len(data) 
-        and (0 <= col + dx < len(data[0]))
-    )
+# strategy: reorient the data into every permutation of angle to check
+data_rotated_90 = [''.join(x) for x in zip(*data)]
+data_rotated_45 = get_45deg_2d_list(data)
+data_rotated_45_mirrored = get_45deg_2d_list(mirror(data))
+angles = [
+    data,
+    mirror(data),
+    data_rotated_90,
+    mirror(data_rotated_90),
+    data_rotated_45,
+    mirror(data_rotated_45),
+    data_rotated_45_mirrored,
+    mirror(data_rotated_45_mirrored)
+]
 
 total = 0
-for row in range(len(data)):
-    for col in range(len(data[row])):
-        total += check_cell(data, row, col)
-
+for grid in angles:
+    count = sum(row.count('XMAS') for row in grid)
+    total += count
 print(total)
