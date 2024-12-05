@@ -19,18 +19,13 @@ def fix_seq(seq: list, prereqs: dict):
         if page in seq
     }
 
-    fixed_seq = []
-    for _ in seq:
-        # there is only one correct solution
-        # so there will only be one correct "next number"
-        candidate = next(
-            k for k, v in relevant.items() 
-            if not v and k not in fixed_seq
-        )
-        for page, page_prereq in relevant.items():
-            if candidate in page_prereq:
-                relevant[page].remove(candidate)
-        fixed_seq.append(candidate)
+    # there is only one correct solution
+    # so there will only be one correct "next number"
+    # every page has a different number of prequisites
+    # sort by number of prequisites to solve
+    fixed_seq = ['' for _ in seq]
+    for page, prereqs in relevant.items():
+        fixed_seq[len(prereqs)] = page
     return fixed_seq
 
 
