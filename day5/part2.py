@@ -2,11 +2,10 @@ from collections import defaultdict
 from copy import deepcopy
 
 
-def validate(seq, prereqs):
+def validate(seq: list, prereqs: dict):
     for i in range(len(seq)):
         page = seq[i]
         page_prereqs = prereqs[page]
-
         # ensure prerequisite page already appeared
         if not all(x in seq[:i] for x in page_prereqs if x in seq):
             return False
@@ -22,15 +21,16 @@ def fix_seq(seq: list, prereqs: dict):
 
     fixed_seq = []
     for _ in seq:
-        candidates = {
-            k: v for k, v in relevant.items() 
+        # there is only one correct solution
+        # so there will only be one correct "next number"
+        candidate = next(
+            k for k, v in relevant.items() 
             if not v and k not in fixed_seq
-        }
-        for c in candidates:
-            for page, page_prereq in relevant.items():
-                if c in page_prereq:
-                    relevant[page].remove(c)
-            fixed_seq.append(c)
+        )
+        for page, page_prereq in relevant.items():
+            if candidate in page_prereq:
+                relevant[page].remove(candidate)
+        fixed_seq.append(candidate)
     return fixed_seq
 
 
@@ -39,7 +39,7 @@ with open('day5/input.txt') as f:
 
 marker = data.index('')
 rules = data[:marker]
-updates = data[marker +1:]
+updates = data[marker + 1:]
 
 prereqs = defaultdict(list)
 for rule in rules:
