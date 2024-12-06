@@ -9,14 +9,11 @@ def find_start_pos(data: list[list[int]]):
                 return row, col
     raise Exception('bruh')
 
-
 def get_col_as_list(data: list[list[str]], col: int):
     return [row[col] for row in data]
 
-
 def get_indexes_of_obstacles(path: list):
     return [i for i, x in enumerate(path) if x == '#']
-
 
 def get_next_collision(pos: int, obstacles: list[int], forward: bool):
     if forward:
@@ -29,22 +26,10 @@ def get_next_collision(pos: int, obstacles: list[int], forward: bool):
 
     return upcoming[0]
 
-
 def step_direction(direction: str, n: int = 1):
     seq = ['up', 'right', 'down', 'left']
     i = (seq.index(direction) + n) % len(seq)
     return seq[i]
-
-
-def get_next_cell(cell: tuple[int, int], direction: str):
-    d = {
-        'up':       (-1, 0),
-        'right':    (0, 1),
-        'down':     (1, 0),
-        'left':     (0, -1),
-    }
-    return cell[0] + d[direction][0], cell[1] + d[direction][1]
-
 
 def find_collision_up(data, pos):
     path = get_col_as_list(data, pos[1])
@@ -89,133 +74,85 @@ def calculate_theoretical_collision(data, cell, direction):
         new_pos = (collision[0], collision[1] - 1)
     return collision, new_pos
 
-def is_oob(data, cell):
-    return not (
-        0 <= cell[0] < len(data) 
-        and 0 <= cell[1] < len(data[0])
-    )
 
-
-with open('day6/input.txt') as f:
-    data = f.read().splitlines()
-
-start_pos = find_start_pos(data)
-pos = start_pos
-direction = 'up'
-visited = defaultdict(list)
-collided = defaultdict(list)
-candidates = []
-
-is_pos_oob = False
-while True:
-    if direction == 'up':
-        collided_row = find_collision_up(data, pos)
-        if collided_row == -1:
-            just_visited = [(row, pos[1]) for row in range(pos[0], -1, -1)]
-            is_pos_oob = True
-        else:
-            new_pos = (collided_row + 1, pos[1])
-            just_visited = [(row, pos[1]) for row in range(pos[0], new_pos[0] - 1, -1)]
-            collided[(collided_row, pos[1])].append(direction)
-
-    elif direction == 'down':
-        collided_row = find_collision_down(data, pos)
-        if collided_row == -1:
-            just_visited = [(row, pos[1]) for row in range(pos[0], len(data))]
-            is_pos_oob = True
-        else:
-            new_pos = (collided_row - 1, pos[1])
-            just_visited = [(row, pos[1]) for row in range(pos[0], new_pos[0] + 1)]
-            collided[(collided_row, pos[1])].append(direction)
-
-    elif direction == 'left':
-        collided_col = find_collision_left(data, pos)
-        if collided_col == -1:
-            just_visited = [(pos[0], col) for col in range(pos[1], -1, -1)]
-            is_pos_oob = True
-        else:
-            new_pos = (pos[0], collided_col + 1)
-            just_visited = [(pos[0], col) for col in range(pos[1], new_pos[1] - 1, -1)]
-            collided[(pos[0], collided_col)].append(direction)
-
-    elif direction == 'right':
-        collided_col = find_collision_right(data, pos)
-        if collided_col == -1:
-            just_visited = [(pos[0], col) for col in range(pos[1], len(data[0]))]
-            is_pos_oob = True
-        else:
-            new_pos = (pos[0], collided_col - 1)
-            just_visited = [(pos[0], col) for col in range(pos[1], new_pos[1] + 1)]
-            collided[(pos[0], collided_col)].append(direction)
-
-    for cell in just_visited:
-        visited[cell].append(direction)
-        
-    if is_pos_oob:
-        break
-
-    pos = new_pos
-    direction = step_direction(direction)
 
 def run(data) -> bool:
     pos = find_start_pos(data)
     direction = 'up'
     visited = defaultdict(list)
     collided = defaultdict(list)
-    candidates = []
 
     is_pos_oob = False
     while True:
         if direction == 'up':
             collided_row = find_collision_up(data, pos)
             if collided_row == -1:
+                just_visited = [(row, pos[1]) for row in range(pos[0], -1, -1)]
                 is_pos_oob = True
             else:
                 new_pos = (collided_row + 1, pos[1])
+                just_visited = [(row, pos[1]) for row in range(pos[0], new_pos[0] - 1, -1)]
                 obstacle_pos = (collided_row, pos[1])
                 collided[obstacle_pos].append(direction)
                 if len(collided[obstacle_pos]) != len(set(collided[obstacle_pos])):
-                    return True
+                    return visited, True
 
         elif direction == 'down':
             collided_row = find_collision_down(data, pos)
             if collided_row == -1:
+                just_visited = [(row, pos[1]) for row in range(pos[0], len(data))]
                 is_pos_oob = True
             else:
                 new_pos = (collided_row - 1, pos[1])
+                just_visited = [(row, pos[1]) for row in range(pos[0], new_pos[0] + 1)]
                 obstacle_pos = (collided_row, pos[1])
                 collided[obstacle_pos].append(direction)
                 if len(collided[obstacle_pos]) != len(set(collided[obstacle_pos])):
-                    return True
+                    return visited, True
 
         elif direction == 'left':
             collided_col = find_collision_left(data, pos)
             if collided_col == -1:
+                just_visited = [(pos[0], col) for col in range(pos[1], -1, -1)]
                 is_pos_oob = True
             else:
                 new_pos = (pos[0], collided_col + 1)
+                just_visited = [(pos[0], col) for col in range(pos[1], new_pos[1] - 1, -1)]
                 obstacle_pos = (pos[0], collided_col)
                 collided[obstacle_pos].append(direction)
                 if len(collided[obstacle_pos]) != len(set(collided[obstacle_pos])):
-                    return True
+                    return visited, True
 
         elif direction == 'right':
             collided_col = find_collision_right(data, pos)
             if collided_col == -1:
+                just_visited = [(pos[0], col) for col in range(pos[1], len(data[0]))]
                 is_pos_oob = True
             else:
                 new_pos = (pos[0], collided_col - 1)
+                just_visited = [(pos[0], col) for col in range(pos[1], new_pos[1] + 1)]
                 obstacle_pos = (pos[0], collided_col)
                 collided[obstacle_pos].append(direction)
                 if len(collided[obstacle_pos]) != len(set(collided[obstacle_pos])):
-                    return True
+                    return visited, True
+
+        for cell in just_visited:
+            visited[cell].append(direction)
 
         if is_pos_oob:
-            return False
+            return visited, False
 
         pos = new_pos
         direction = step_direction(direction)
 
+
+with open('day6/input.txt') as f:
+    data = f.read().splitlines()
+
+visited, is_looping = run(data)
+
+start_pos = find_start_pos(data)
+candidates = []
 for cell in visited:
     if cell == start_pos:
         continue
@@ -223,7 +160,8 @@ for cell in visited:
     alt_data = deepcopy(data)
     alt_data[cell[0]] = alt_data[cell[0]][:cell[1]] + '#' + alt_data[cell[0]][cell[1] + 1:]
     # run it to see if it loops
-    if run(alt_data):
+    _, is_looping = run(alt_data)
+    if is_looping:
         candidates.append(cell)
 
 
