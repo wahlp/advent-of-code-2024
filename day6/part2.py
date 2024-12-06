@@ -29,11 +29,9 @@ def get_next_collision(pos: int, obstacles: list[int], forward: bool):
     return upcoming[0]
 
 
-def get_next_direction(direction: str):
+def step_direction(direction: str, n: int = 1):
     seq = ['up', 'right', 'down', 'left']
-    i = seq.index(direction) + 1
-    if i == len(seq):
-        i = 0
+    i = (seq.index(direction) + n) % len(seq)
     return seq[i]
 
 
@@ -72,7 +70,7 @@ def find_collision_right(data, pos):
     return collided_col
 
 
-with open('day6/input.txt') as f:
+with open('day6/sample.txt') as f:
     data = f.read().splitlines()
 
 pos = find_start_pos(data)
@@ -123,44 +121,43 @@ while True:
             just_visited = [(pos[0], col) for col in range(pos[1], new_pos[1] + 1)]
             collided[(pos[0], collided_col)].append(direction)
 
-    # check for opportunities to create a loop
-    next_direction = get_next_direction(direction)
     for cell in just_visited:
-        # maybe a reachable cell to our clockwise 3oclock can be connected
-        # check if we can to collide with an obstacle 
-        # from an angle that has already been used
-        if next_direction == 'up':
-            collision_target = (find_collision_up(data, cell), cell[1])
-            if collision_target in collided:
-                if 'up' in collided[collision_target]:
-                    candidates.append(get_next_cell(cell, direction))
-
-        elif next_direction == 'down':
-            collision_target = (find_collision_down(data, cell), cell[1])
-            if collision_target in collided:
-                if 'down' in collided[collision_target]:
-                    candidates.append(get_next_cell(cell, direction))
-
-        elif next_direction == 'left':
-            collision_target = (cell[0], find_collision_left(data, cell))
-            if collision_target in collided:
-                if 'left' in collided[collision_target]:
-                    candidates.append(get_next_cell(cell, direction))
-
-        elif next_direction == 'right':
-            collision_target = (cell[0], find_collision_right(data, cell))
-            if collision_target in collided:
-                if 'right' in collided[collision_target]:
-                    candidates.append(get_next_cell(cell, direction))
-
         visited[cell].append(direction)
-        # print(f'visited {cell = }')
 
     if is_pos_oob:
         break
 
     pos = new_pos
-    direction = get_next_direction(direction)
+    direction = step_direction(direction)
+
+
+# strategy:
+# of all possible turns that could hit this obstacle,
+# how many could have been made by branching off paths that already exist?
+# search all potentially instigating cells
+for collision_target, collision_directions in collided.items():
+    for direction in collision_directions:
+        prev_direction = step_direction(direction, n=3)
+        opp_direction = step_direction(direction, n=2)
+
+        # find path crossings that could turn to hit this target
+        cell = get_next_cell(collision_target, opp_direction)
+        while True:
+            # make sure we are allowed to check this cell
+            if not (0 <= cell[0] < len(data[0]) and 0 <= cell[1] < len(data)):
+                break
+            if data[cell[0]][cell[1]] == '#':
+                break
+
+            # deja vu, ive just been in this place before
+            if cell in visited:
+                if prev_direction in visited[cell]:
+                    candidate = get_next_cell(cell, prev_direction)
+                    # dont count turns that were made during the original run
+                    if candidate not in collided:
+                        candidates.append(candidate)
+            cell = get_next_cell(cell, opp_direction)
+
 
 # debugging
 obstacle_count_bef = sum(row.count('#') for row in data)
