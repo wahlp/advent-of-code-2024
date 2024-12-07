@@ -1,3 +1,6 @@
+from itertools import product
+
+
 with open('day7/input.txt') as f:
     lines = f.read().splitlines()
 
@@ -8,20 +11,22 @@ for line in lines:
     sources = [int(x) for x in parts[1:]]
     data.append((target, sources))
 
-def evaluate_expr(target, sources, operators) -> bool:
-    buf = sources[0]
-    for o, n in zip(operators, sources[1:]):
-        if o == '+':
-            buf += n
-        elif o == '*':
-            buf *= n
-        else:
-            buf = int(str(buf) + str(n))
-        if buf > target:
-            return False
-    return buf == target
-
-from itertools import product
+def check_combos(target, sources, combos) -> bool:
+    for operators in combos:
+        buf = sources[0]
+        for o, n in zip(operators, sources[1:]):
+            if o == '+':
+                buf += n
+            elif o == '*':
+                buf *= n
+            else:
+                buf = int(str(buf) + str(n))
+            
+            if buf > target:
+                break
+        if buf == target:
+            return True
+    return False
 
 def generate_combinations(n: int):
     return product(['+', '*', '||'], repeat=n)
@@ -30,12 +35,7 @@ def generate_combinations(n: int):
 total = 0
 for target, sources in data:
     combos = generate_combinations(len(sources) - 1)
-    for operators in combos:
-        s = ' '.join(' '.join(str(x) for x in t) for t in zip(sources, operators)) + ' ' + str(sources[-1])
-        is_target_achievable = evaluate_expr(target, sources, operators)
-        # print(f'{target}: {outcome} = {s}')
-        if is_target_achievable:
-            break
+    is_target_achievable = check_combos(target, sources, combos)
     
     if is_target_achievable:
         total += target
