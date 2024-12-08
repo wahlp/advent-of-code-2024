@@ -1,7 +1,7 @@
 from collections import defaultdict
 from itertools import permutations
 
-with open('day8/sample.txt') as f:
+with open('day8/input.txt') as f:
     lines = f.read().splitlines()
 
 signals = defaultdict(list)
@@ -35,20 +35,17 @@ for channel, members in signals.items():
     combos = permutations(members, 2)
     for n1, n2 in combos:
         antinode_pos_list = get_antinodes(n1, n2, lines)
-        # if is_oob(antinode_pos, lines):
-        #     continue
         for antinode_pos in antinode_pos_list:
             char_at_antinode = lines[antinode_pos[0]][antinode_pos[1]]
             if char_at_antinode != channel:
                 valid_antinodes.append(antinode_pos)
 
 
-# debugging
 for pos in valid_antinodes:
     lines[pos[0]] = lines[pos[0]][:pos[1]] + '#' + lines[pos[0]][pos[1] + 1:]
-for line in lines:
-    print(line)
 
+# debugging
+# for line in lines:
+#     print(line)
 
-answer = len(set(valid_antinodes))
-print(f'{answer = }')
+print(f'answer = {len([x for row in lines for x in row if x != '.'])}')
