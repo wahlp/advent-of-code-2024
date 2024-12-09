@@ -1,4 +1,4 @@
-with open('day9/sample.txt') as f:
+with open('day9/input.txt') as f:
     data = f.read().replace('\n', '')
 
 empty_char = '.'
@@ -26,6 +26,9 @@ for block_id in reversed(blocks.keys()):
         (space_loc for space_loc, space_size in spaces.items() if 0 < block_size <= space_size), -1
     )
     if space_loc == -1:
+        continue
+    # dont move to the right
+    if space_loc > block_loc:
         continue
     # update block location
     blocks[block_id] = (space_loc, block_size)
