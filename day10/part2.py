@@ -3,11 +3,10 @@ class Position(NamedTuple):
     y: int
     x: int
 
-class Tree:
+class Search:
     def __init__(self, data: list[list[int]], start: Position):
         self.data = data
         self.pos = start
-
         self.found = []
 
     def run(self):
@@ -23,7 +22,6 @@ class Tree:
             Position(pos.y, pos.x+1),
             Position(pos.y, pos.x-1),
         ]
-        to_visit = []
         for t in adjacent_tiles:
             if is_oob(self.data, t):
                 continue
@@ -33,10 +31,7 @@ class Tree:
                 if adjacent_tile_value == 9:
                     self.found.append(t)
                 else:
-                    to_visit.append(t)
-
-        for t in to_visit:
-            self.explore(t)
+                    self.explore(t)
 
 def is_oob(data: list[list], pos: Position):
     return not (
@@ -58,8 +53,8 @@ def main():
 
     total = 0
     for start in start_positions:
-        tree = Tree(data, start)
-        r = tree.run()
+        search = Search(data, start)
+        r = search.run()
         # print(f'tree starting at {start} found {r}')
         total += r
     print(f'{total = }')
