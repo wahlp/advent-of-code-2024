@@ -1,4 +1,5 @@
 from collections import defaultdict
+from heapq import heappush, heappop
 
 
 def parse_input(filename):
@@ -20,19 +21,22 @@ def attempt_build(build: str, pieces: list[str]):
     for piece in pieces:
         for index in find_all(build, piece):
             piece_appearances[index].append(piece)
+    for k in piece_appearances:
+        piece_appearances[k].sort(key=lambda x: len(x))
 
-    queue = [0]
+    paths_to_pos = defaultdict(int)
+    paths_to_pos[0] = 1
+    queue = []
+    heappush(queue, 0)
     while queue:
-        pos = queue.pop(0)
-        candidates = piece_appearances[pos]
-        for item in candidates:
-            next_item_pos = pos + len(item)
-            if next_item_pos == len(build):
-                return True
-            if next_item_pos in piece_appearances and next_item_pos not in queue:
-                queue.append(next_item_pos)
-    return False
-
+        start_pos = heappop(queue)
+        candidates = piece_appearances[start_pos]
+        for candidate in candidates:
+            end_pos = start_pos + len(candidate)
+            paths_to_pos[end_pos] += paths_to_pos[start_pos]
+            if end_pos in piece_appearances and end_pos not in queue:
+                heappush(queue, end_pos)
+    return paths_to_pos[len(build)]
 
 
 def main(filename):
@@ -46,6 +50,6 @@ def main(filename):
     return total
 
 
-assert main('sample.txt') == 6
+assert main('sample.txt') == 16
 r = main('input.txt')
 print(f'answer: {r}')
