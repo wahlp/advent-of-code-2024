@@ -6,16 +6,12 @@ def read_input(filename: str):
         grid = f.read().splitlines()
     
     start_pos = ()
-    end_pos = ()
     for i, row in enumerate(grid):
         s = row.find('S')
         if s > -1:
             start_pos = (i, s)
-        e = row.find('E')
-        if e > -1:
-            end_pos = (i, e)
 
-    return grid, start_pos, end_pos
+    return grid, start_pos
 
 
 def algo(grid, start_pos):
@@ -58,7 +54,7 @@ def manhattan_distance(c1, c2):
 
 
 def main(filename: str):
-    grid, start_pos, end_pos = read_input(filename)
+    grid, start_pos = read_input(filename)
     distances = algo(grid, start_pos)
 
     total = 0
