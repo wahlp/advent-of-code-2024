@@ -146,7 +146,7 @@ def run(data) -> bool:
         direction = step_direction(direction)
 
 
-with open('day6/input.txt') as f:
+with open('day06/input.txt') as f:
     data = f.read().splitlines()
 
 visited, is_looping = run(data)

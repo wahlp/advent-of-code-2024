@@ -21,7 +21,7 @@ def get_45deg_2d_list(lst: list[list[str]]):
     return new_lst
 
 
-with open('day4/input.txt') as f:
+with open('day04/input.txt') as f:
     data = f.read().splitlines()
 
 # strategy: reorient the data into every permutation of angle to check

@@ -1,4 +1,4 @@
-with open('day1/input.txt') as f:
+with open('day01/input.txt') as f:
     data = f.read()
 
 c1, c2 = [], []

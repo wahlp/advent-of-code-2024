@@ -34,7 +34,7 @@ def direction_iterator():
     yield next(seq)
 
 
-with open('day6/input.txt') as f:
+with open('day06/input.txt') as f:
     data = f.read().splitlines()
 
 pos = find_start_pos(data)

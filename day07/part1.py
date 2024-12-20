@@ -1,4 +1,4 @@
-with open('day7/input.txt') as f:
+with open('day07/input.txt') as f:
     lines = f.read().splitlines()
 
 data: list[tuple[int, list[int]]] = []

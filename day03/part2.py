@@ -1,4 +1,4 @@
-with open('day3/input.txt') as f:
+with open('day03/input.txt') as f:
     data = f.read()
 
 import re

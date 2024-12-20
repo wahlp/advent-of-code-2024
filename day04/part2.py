@@ -1,4 +1,4 @@
-with open('day4/input.txt') as f:
+with open('day04/input.txt') as f:
     data = f.read().splitlines()
 
 def check_cell(data: list[list[str]], row: int, col: int):

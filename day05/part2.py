@@ -29,7 +29,7 @@ def fix_seq(seq: list, prereqs: dict):
     return fixed_seq
 
 
-with open('day5/input.txt') as f:
+with open('day05/input.txt') as f:
     data = f.read().splitlines()
 
 marker = data.index('')

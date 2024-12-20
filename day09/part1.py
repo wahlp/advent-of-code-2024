@@ -1,4 +1,4 @@
-with open('day9/input.txt') as f:
+with open('day09/input.txt') as f:
     data = f.read().replace('\n', '')
 
 empty_char = None

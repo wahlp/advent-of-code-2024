@@ -1,7 +1,7 @@
 from collections import defaultdict
 from itertools import permutations
 
-with open('day8/input.txt') as f:
+with open('day08/input.txt') as f:
     lines = f.read().splitlines()
 
 signals = defaultdict(list)

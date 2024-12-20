@@ -1,4 +1,4 @@
-with open('day2/input.txt') as f:
+with open('day02/input.txt') as f:
     data = f.readlines()
 
 total = 0
