@@ -52,26 +52,27 @@ def algo(grid: list[str]):
 
 def find_members_of_shortest_paths(distances, start_pos, end_pos):
     positions_with_data = set(x[0] for x in distances.keys())
-    p1_answer = min(v for k, v in distances.items() if k[0] == end_pos)
+    end_pos_lowest_value = min(v for k, v in distances.items() if k[0] == end_pos)
+    end_pos_entry_direction = next(k for k, v in distances.items() if v == end_pos_lowest_value)[1]
 
     visited = set()
-    queue = [end_pos]
+    queue = [(end_pos, end_pos_entry_direction)]
     while queue:
-        pos_aft = queue.pop(0)
+        pos_aft, direction_aft = queue.pop(0)
         visited.add(pos_aft)
         if pos_aft == start_pos:
             continue
         prev_positions = find_possible_previous_positions(pos_aft)
-        for pos_bef, direction in prev_positions:
+        for pos_bef, direction_bef in prev_positions:
             if pos_bef not in positions_with_data:
                 continue
             if pos_bef in visited:
                 continue
-            if distances[pos_bef, direction] > p1_answer:
+            if distances[pos_bef, direction_bef] > end_pos_lowest_value:
                 continue
             # reverse the calculation and see if it was possible to come from here
-            if validate_move(distances, pos_bef, pos_aft, direction):
-                queue.append(pos_bef)
+            if validate_move(distances, pos_bef, direction_bef, pos_aft, direction_aft):
+                queue.append((pos_bef, direction_bef))
     return visited
 
 def find_possible_previous_positions(pos):
@@ -82,11 +83,21 @@ def find_possible_previous_positions(pos):
         ((pos[0], pos[1] - 1), 'right'),
     ]
 
-def validate_move(distances, pos_bef, pos_aft, direction):
-    return (
-        distances[(pos_bef, direction)] + 1
-        == distances[(pos_aft, direction)]
-    )
+def validate_move(distances, pos_bef, direction_bef, pos_aft, direction_aft):
+    a = (
+        distances[(pos_bef, direction_bef)] + 1
+        == distances[(pos_aft, direction_bef)]
+    ) 
+    if direction_bef != direction_aft:
+        b = (
+            # make sure moving forward + turning is part of one solution
+            # and not two separate solutions
+            distances[(pos_aft, direction_bef)] + 1000
+            == distances[(pos_aft, direction_aft)]
+        )
+        return a and b
+    else:
+        return a
 
 
 def print_grid(data, visited):
