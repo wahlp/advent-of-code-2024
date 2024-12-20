@@ -3,9 +3,9 @@ with open('day03/input.txt') as f:
 
 import re
 
-muls = re.finditer('mul\((\d+),(\d+)\)', data)
-donts = re.finditer("don\'t\(\)", data)
-dos = re.finditer('do\(\)', data)
+muls = re.finditer(r'mul\((\d+),(\d+)\)', data)
+donts = re.finditer(r"don\'t\(\)", data)
+dos = re.finditer(r'do\(\)', data)
 
 markers = []
 for marker in donts:

@@ -3,7 +3,7 @@ with open('day03/input.txt') as f:
 
 import re
 
-r = re.findall('mul\((\d+),(\d+)\)', data)
+r = re.findall(r'mul\((\d+),(\d+)\)', data)
 
 total = 0
 for x in r:
