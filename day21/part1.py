@@ -1,3 +1,4 @@
+from collections import Counter, defaultdict
 from functools import cache
 
 
@@ -74,29 +75,34 @@ DIRECTIONAL_KEYPAD = {
     'v': (1, 1),
     '>': (1, 2),
 }
-def calc_directional_button_code_path(code: str):
-    pos = DIRECTIONAL_KEYPAD['A']
-    path = ''
-    for c in code:
-        path += calc_paths(pos, DIRECTIONAL_KEYPAD[c], (0, 0))
-        pos = DIRECTIONAL_KEYPAD[c]
-    return path
+def calc_directional_button_code_path_members(prev_code_transitions: str):
+    code_transitions = defaultdict(int)
+    for transition, count in prev_code_transitions.items():
+        c1 = DIRECTIONAL_KEYPAD[transition[0]]
+        c2 = DIRECTIONAL_KEYPAD[transition[1]]
+        subpath = calc_paths(c1, c2, (0, 0))
+        for k, v in convert_path_to_transitions(subpath).items():
+            code_transitions[k] += v * count
+    return code_transitions
 
 
-def calc_complexity(code: str, processed_code: str):
-   a = len(processed_code)
-   b = int(code[:-1])
-   return a * b
+def convert_path_to_transitions(path: str) -> dict[tuple[str, str], int]:
+    path = 'A' + path
+    transitions = [(path[i-1], path[i]) for i in range(len(path)) if i > 0]
+    return Counter(transitions)
 
 
 def parse_code(code, n):
-    code_layers = [calc_numeric_button_code_path(code)]
+    layer0 = calc_numeric_button_code_path(code)
+    code_transitions = convert_path_to_transitions(layer0)
     for i in range(1, n):
-        print(f'calculating directional layer {i}')
-        processed_code = calc_directional_button_code_path(code_layers[-1])
-        code_layers.append(processed_code)
+        # print(f'calculating directional layer {i}')
+        code_transitions = calc_directional_button_code_path_members(code_transitions)
     
-    return calc_complexity(code, processed_code)
+    # complexity
+    c1 = sum(v for v in code_transitions.values())
+    c2 = int(code[:-1])
+    return c1 * c2
 
 
 def main(filename: str, layers: int):
