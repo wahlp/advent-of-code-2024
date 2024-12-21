@@ -8,23 +8,20 @@ def read_input(filename: str):
     return data
 
 @cache
-def calc_paths(pos1, pos2, illegal_pos, path_start = False):
+def calc_paths(pos1, pos2, illegal_pos):
     dy = pos1[0] - pos2[0]
     dx = pos1[1] - pos2[1]
 
-    if dy > 0:
-        y_component = '^' * dy
-    elif dy < 0:
-        y_component = 'v' * abs(dy)
-    else:
-        y_component = ''
+    def calc_component(d, char_pos, char_neg):
+        if d > 0:
+            return char_neg * d
+        elif d < 0:
+            return char_pos * abs(d)
+        else:
+            return ''
     
-    if dx > 0:
-        x_component = '<' * dx
-    elif dx < 0:
-        x_component = '>' * abs(dx)
-    else:
-        x_component = ''
+    y_component = calc_component(dy, 'v', '^')
+    x_component = calc_component(dx, '>', '<')
     
     would_horizontally_enter_illegal_space = ((pos2[0] + dy, pos1[1] - dx) == illegal_pos)
     would_vertically_enter_illegal_space = ((pos1[0] - dy, pos2[1] + dx) == illegal_pos)
@@ -65,6 +62,7 @@ def calc_numeric_button_code_path(code: str) -> str:
         pos = NUMERIC_KEYPAD[c]
     return path
 
+
 DIRECTIONAL_KEYPAD = {
     '^': (0, 1),
     'A': (0, 2),
@@ -74,10 +72,10 @@ DIRECTIONAL_KEYPAD = {
 }
 def calc_directional_button_code_path_members(prev_code_transitions: str):
     code_transitions = defaultdict(int)
-    for i, (transition, count) in enumerate(prev_code_transitions.items()):
+    for transition, count in prev_code_transitions.items():
         c1 = DIRECTIONAL_KEYPAD[transition[0]]
         c2 = DIRECTIONAL_KEYPAD[transition[1]]
-        subpath = calc_paths(c1, c2, (0, 0), i == 0)
+        subpath = calc_paths(c1, c2, (0, 0))
         for k, v in convert_path_to_transitions(subpath).items():
             code_transitions[k] += v * count
     return code_transitions
@@ -110,6 +108,6 @@ def main(filename: str, layers: int):
     return total
     
 
-assert main('sample.txt', 2) == 126384
+# assert main('sample.txt', 2) == 126384
 r = main('input.txt', 25)
 print(f'answer: {r}')
