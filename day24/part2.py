@@ -31,11 +31,8 @@ def compare_z_output_to_expected(expected_z_bits, values):
         actual_bits_place = num_bits - i - 1
         pos = str(actual_bits_place).rjust(2, '0')
         actual_z_bit = str(values[f'z{pos}'])
-        # print(f'position {pos}: ', expected_z_bits[i], actual_z_bit)
         if expected_z_bits[i] != actual_z_bit:
-            # print('^^^ different ^^^')
             different_indexes.append(actual_bits_place)
-    # print()
     return different_indexes
 
 def calc_expected_z(values: dict[str, int]):
@@ -123,38 +120,12 @@ def find_swap(wrong_digit: int, statements_dict: dict):
         if len(potential_swap) == 2:
             return tuple(potential_swap)
     else:
-        xy_xor_sibling = None
         for xy_xor_child, xy_xor_child_statement in xy_xor_children.items():
             if xy_xor_child_statement[1] == 'XOR':
                 if xy_xor_child != z_digit:
-                    # potential_swap.add(xy_xor)
                     potential_swap.add(xy_xor_child)
                     if len(potential_swap) == 2:
                         return tuple(potential_swap)
-
-                if xy_xor_child_statement[0] == xy_xor:
-                    if xy_xor_sibling is None:
-                        xy_xor_sibling = xy_xor_child_statement[2]
-                    else:
-                        assert xy_xor_sibling == xy_xor_child_statement[2]
-                elif xy_xor_child_statement[2] == xy_xor:
-                    if xy_xor_sibling is None:
-                        xy_xor_sibling = xy_xor_child_statement[0]
-                    else:
-                        assert xy_xor_sibling == xy_xor_child_statement[0]
-                
-            else:
-                # AND
-                if xy_xor_child_statement[0] == xy_xor:
-                    if xy_xor_sibling is None:
-                        xy_xor_sibling = xy_xor_child_statement[2]
-                    else:
-                        assert xy_xor_sibling == xy_xor_child_statement[2]
-                else:
-                    if xy_xor_sibling is None:
-                        xy_xor_sibling = xy_xor_child_statement[0]
-                    else:
-                        assert xy_xor_sibling == xy_xor_child_statement[0]
 
 
 def eval_statements(inputs, statements_dict):
