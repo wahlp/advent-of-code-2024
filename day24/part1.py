@@ -1,6 +1,3 @@
-from copy import deepcopy
-
-
 def parse_input(filename: str):
     with open(f'day24/{filename}') as f:
         d1, d2 = f.read().split('\n\n')
@@ -19,12 +16,7 @@ def parse_input(filename: str):
 
 
 def main(filename: str):
-    sources, statements = parse_input(filename)
-    
-    # values = deepcopy(sources)
-    # queue = deepcopy(statements)    
-    values = sources
-    queue = statements
+    values, queue = parse_input(filename)
 
     while queue:
         statement = queue.pop(0)
@@ -52,9 +44,6 @@ def main(filename: str):
     answer = int(''.join(str(x[1]) for x in bits), 2)
     return answer
 
-
-                
-        
 
 r = main('input.txt')
 print(f'answer: {r}')
