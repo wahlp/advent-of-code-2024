@@ -1,24 +1,38 @@
-with open('day09/input.txt') as f:
-    data = f.read().replace('\n', '')
+EMPTY_CHAR = None
 
-empty_char = None
+def parse_input(filename):
+    with open(f'day09/{filename}') as f:
+        data = f.read().replace('\n', '')
 
-block_id = 0
-block_expr = []
-for i, char in enumerate(data):
-    num_repeat = int(char)
-    if i % 2 == 0:
-        block_expr.extend([block_id] * num_repeat)
-        block_id += 1
-    else:
-        block_expr.extend([empty_char] * num_repeat)
+    block_id = 0
+    block_expr = []
+    for i, char in enumerate(data):
+        if i % 2 == 0:
+            block_expr.extend([block_id] * int(char))
+            block_id += 1
+        else:
+            block_expr.extend([EMPTY_CHAR] * int(char))
+    return block_expr
 
-while empty_char in block_expr:
-    last = block_expr.pop()
-    if last == empty_char:
-        continue
-    first_opening = block_expr.index(empty_char)
-    block_expr[first_opening] = last
 
-total = sum(i * int(char) for i, char in enumerate(block_expr))
-print(f'{total = }')
+def main(filename):
+    block_expr = parse_input(filename)
+    # turning point will be the final length of the compressed characters string
+    turning_point = sum(x != EMPTY_CHAR for x in block_expr)
+    
+    # fold it at the turning point
+    chars_right = iter(x for x in reversed(block_expr[turning_point:]) if x != EMPTY_CHAR)
+    new_block_expr = [EMPTY_CHAR] * turning_point
+    for i in range(turning_point):
+        if block_expr[i] == EMPTY_CHAR:
+            new_block_expr[i] = next(chars_right)
+        else:
+            new_block_expr[i] = block_expr[i]
+
+    total = sum(i * int(char) for i, char in enumerate(new_block_expr))
+    return total
+
+
+assert main('sample.txt') == 1928
+r = main('input.txt')
+print(f'answer = {r}')
