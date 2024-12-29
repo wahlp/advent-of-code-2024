@@ -11,7 +11,13 @@ class SortBy(Enum):
 
 def main(sort_by: SortBy = SortBy.name):
     scripts = get_aoc_scripts()
-    data = [(script, time_script(script, ignore_prints=True)) for script in scripts]
+    
+    data = []
+    for script in scripts:
+        print(f'running script: {script}', end='\r')
+        t = time_script(script, ignore_prints=True)
+        data.append((script, t))
+
     data.sort(key=lambda x: x[sort_by.value])
 
     print(f'{'script':<15} | {'time':>9}')
