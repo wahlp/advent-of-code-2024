@@ -1,57 +1,60 @@
+from collections import defaultdict
+from heapq import heappop, heappush
+
+
 EMPTY_CHAR = None
 
 def parse_input(filename):
     with open(f'day09/{filename}') as f:
         data = f.read().replace('\n', '')
 
-    block_id = 0
-    block_expr = []
+    blocks = []
+    pos = 0
+    spaces = defaultdict(list)
     for i, char in enumerate(data):
-        if not block_expr:
-            span = range(i, i + int(char))
-        else:
-            start = block_expr[-1][0].stop
-            span = range(start, start + int(char))
-
+        block_size = int(char)
+        block_range = range(pos, pos + block_size)
         if i % 2 == 0:
-            block_expr.append((span, block_id))
-            block_id += 1
+            block_id = i // 2
+            blocks.append((block_range, block_id))
         else:
-            block_expr.append((span, EMPTY_CHAR))
-    return block_expr
+            heappush(spaces[block_size], pos)
+        pos += block_size
+
+    return blocks, spaces
+
+
+def find_space(spaces, block_size, block_pos):
+    best_pos = block_pos
+    best_space_size = block_size
+    for space_size in spaces.keys():
+        if block_size > space_size:
+            continue
+        if spaces[space_size]:
+            pos = spaces[space_size][0]
+            if pos < best_pos:
+                best_pos = pos
+                best_space_size = space_size
+    return best_pos, best_space_size
+
 
 
 def main(filename):
-    block_expr = parse_input(filename)
+    blocks, spaces = parse_input(filename)
 
-    additions = 0
-    for old_index, (span1, block_id1) in enumerate(reversed(block_expr)):
-        old_index = len(block_expr) - old_index - additions - 1
-        if block_id1 == EMPTY_CHAR:
+    for i, (block_range, block_id) in enumerate(reversed(blocks)):
+        block_size = len(block_range)
+        space_pos, space_size = find_space(spaces, block_size, block_range.start)
+        if space_pos == block_range.start:
             continue
+        # legal move found
+        heappop(spaces[space_size])
+        blocks[len(blocks) - i - 1] = (range(space_pos, space_pos + block_size), block_id)
+        if (space_leftover := space_size - block_size) > 0:
+            heappush(spaces[space_leftover], space_pos + block_size)
 
-        try:
-            new_index = next(
-                i for i, (span, block_id) in enumerate(block_expr) 
-                if block_id == EMPTY_CHAR and len(span1) <= len(span) 
-            )
-        except StopIteration:
-            continue
-
-        span2 = block_expr[new_index][0]
-        if span2.start > span1.start:
-            # do not move to the right
-            continue
-        # found a legal move
-        block_expr[old_index] = (span1, EMPTY_CHAR)
-        block_expr[new_index] = (range(span2.start, span2.start + len(span1)), block_id1)
-        if (diff := len(span2) - len(span1)) > 0:
-            new_start = span2.start + len(span1)
-            block_expr.insert(new_index + 1, (range(new_start, new_start + diff), EMPTY_CHAR))
-            additions += 1
-
-    # full_block_expr = ''.join(str(block_id) if block_id != EMPTY_CHAR else '.' for span, block_id in block_expr for _ in span)
-    total = sum(sum(span) * block_id for span, block_id in block_expr if block_id != EMPTY_CHAR)
+    # full_block_expr = ''.join(str(block_id) if block_id != EMPTY_CHAR else '.' for span, block_id in blocks for _ in span)
+    total = sum(sum(span) * block_id for span, block_id in blocks if block_id != EMPTY_CHAR)
     return total
 
 
