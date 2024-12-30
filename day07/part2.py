@@ -27,9 +27,11 @@ def is_achievable(target, sources):
         if can_multiply:
             return True
 
-    if str(target).endswith(str(last_source)):
-        concat_candidate = int(str(target)[:-len(str(last_source))])
-        can_concat = is_achievable(concat_candidate, sources[:-1])
+    next_power_of_10 = 1
+    while next_power_of_10 <= last_source:
+        next_power_of_10 *= 10
+    if (target - last_source) % next_power_of_10 == 0:
+        can_concat = is_achievable((target - last_source) // next_power_of_10, sources[:-1])
         if can_concat:
             return True
 
@@ -39,11 +41,7 @@ def is_achievable(target, sources):
 
 def main(filename):
     data = parse_input(filename)
-        
-    total = 0
-    for target, sources in data:
-        if is_achievable(target, sources):
-            total += target
+    total = sum(target for target, sources in data if is_achievable(target, sources))
     return total
 
 
