@@ -1,42 +1,44 @@
-with open('day07/input.txt') as f:
-    lines = f.read().splitlines()
+def parse_input(filename):
+    with open(f'day07/{filename}') as f:
+        lines = f.read().splitlines()
 
-data: list[tuple[int, list[int]]] = []
-for line in lines:
-    parts = line.split(' ')
-    target = int(parts[0][:-1])
-    sources = [int(x) for x in parts[1:]]
-    data.append((target, sources))
-
-def evaluate_expr(sources, operators) -> int:
-    buf = sources[0]
-    for o, n in zip(operators, sources[1:]):
-        if o == '+':
-            buf += n
-        else:
-            buf *= n
-    return buf
-
-from itertools import product
-
-def generate_combinations(n: int):
-    return product(['+', '*'], repeat=n)
+    data: list[tuple[int, list[int]]] = []
+    for line in lines:
+        parts = line.split(' ')
+        target = int(parts[0][:-1])
+        sources = [int(x) for x in parts[1:]]
+        data.append((target, sources))
+    return data
 
 
-total = 0
-for target, sources in data:
-    is_target_achievable = False
-    combos = generate_combinations(len(sources) - 1)
-    for operators in combos:
-        s = ' '.join(' '.join(str(x) for x in t) for t in zip(sources, operators)) + ' ' + str(sources[-1])
-        outcome = evaluate_expr(sources, operators)
-        # print(f'{target}: {outcome} = {s}')
-        if outcome == target:
-            # print('achievable')
-            is_target_achievable = True
-            break
+def is_achievable(target, sources):
+    if len(sources) == 1:
+        return target == sources[0]
+
+    last_source = sources[-1]
+
+    possible_add = is_achievable(target - last_source, sources[:-1])
+    if possible_add:
+        return True
     
-    if is_target_achievable:
-        total += target
+    if target % last_source == 0:
+        possible_mul = is_achievable(target // last_source, sources[:-1])
+        if possible_mul:
+            return True
 
-print(f'{total = }')
+    return False
+
+
+
+def main(filename):
+    data = parse_input(filename)
+        
+    total = 0
+    for target, sources in data:
+        if is_achievable(target, sources):
+            total += target
+    return total
+
+
+r = main('input.txt')
+print(f'answer: {r}')

@@ -1,43 +1,51 @@
-from itertools import product
+def parse_input(filename):
+    with open(f'day07/{filename}') as f:
+        lines = f.read().splitlines()
+
+    data: list[tuple[int, list[int]]] = []
+    for line in lines:
+        parts = line.split(' ')
+        target = int(parts[0][:-1])
+        sources = [int(x) for x in parts[1:]]
+        data.append((target, sources))
+    return data
 
 
-with open('day07/input.txt') as f:
-    lines = f.read().splitlines()
+def is_achievable(target, sources):
+    if len(sources) == 1:
+        return target == sources[0]
 
-data: list[tuple[int, list[int]]] = []
-for line in lines:
-    parts = line.split(' ')
-    target = int(parts[0][:-1])
-    sources = [int(x) for x in parts[1:]]
-    data.append((target, sources))
+    last_source = sources[-1]
 
-def check_combos(target, sources, combos) -> bool:
-    for operators in combos:
-        buf = sources[0]
-        for o, n in zip(operators, sources[1:]):
-            if o == '+':
-                buf += n
-            elif o == '*':
-                buf *= n
-            else:
-                buf = int(str(buf) + str(n))
-            
-            if buf > target:
-                break
-        if buf == target:
+    if target - last_source > 0:
+        can_add = is_achievable(target - last_source, sources[:-1])
+        if can_add:
             return True
+    
+    if target % last_source == 0:
+        can_multiply = is_achievable(target // last_source, sources[:-1])
+        if can_multiply:
+            return True
+
+    if str(target).endswith(str(last_source)):
+        concat_candidate = int(str(target)[:-len(str(last_source))])
+        can_concat = is_achievable(concat_candidate, sources[:-1])
+        if can_concat:
+            return True
+
     return False
 
-def generate_combinations(n: int):
-    return product(['+', '*', '||'], repeat=n)
 
 
-total = 0
-for target, sources in data:
-    combos = generate_combinations(len(sources) - 1)
-    is_target_achievable = check_combos(target, sources, combos)
-    
-    if is_target_achievable:
-        total += target
+def main(filename):
+    data = parse_input(filename)
+        
+    total = 0
+    for target, sources in data:
+        if is_achievable(target, sources):
+            total += target
+    return total
 
-print(f'{total = }')
+
+r = main('input.txt')
+print(f'answer: {r}')
