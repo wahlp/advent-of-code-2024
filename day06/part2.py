@@ -76,9 +76,7 @@ def calculate_theoretical_collision(data, cell, direction):
 
 
 
-def run(data) -> bool:
-    pos = find_start_pos(data)
-    direction = 'up'
+def run(data, pos, direction) -> bool:
     visited = defaultdict(list)
     collided = defaultdict(list)
 
@@ -146,21 +144,26 @@ def run(data) -> bool:
         direction = step_direction(direction)
 
 
+def replace_at_coord(grid, pos, value):
+    y, x = pos
+    grid[y] = grid[y][:x] + value + grid[y][x + 1:]
+
+
 with open('day06/input.txt') as f:
     data = f.read().splitlines()
 
-visited, is_looping = run(data)
-
 start_pos = find_start_pos(data)
+visited, is_looping = run(data, start_pos, 'up')
+
 candidates = []
 for cell in visited:
     if cell == start_pos:
         continue
     # make alternate version of map with a new obstacle
     alt_data = deepcopy(data)
-    alt_data[cell[0]] = alt_data[cell[0]][:cell[1]] + '#' + alt_data[cell[0]][cell[1] + 1:]
+    replace_at_coord(alt_data, cell, '#')
     # run it to see if it loops
-    _, is_looping = run(alt_data)
+    _, is_looping = run(alt_data, start_pos, 'up')
     if is_looping:
         candidates.append(cell)
 
@@ -180,9 +183,9 @@ for coord, passed_directions in visited.items():
             c = 'v'
     else:
         c = '+'
-    data[coord[0]] = data[coord[0]][:coord[1]] + c + data[coord[0]][coord[1] + 1:]
+    replace_at_coord(data, coord, c)
 for coord in candidates:
-    data[coord[0]] = data[coord[0]][:coord[1]] + 'O' + data[coord[0]][coord[1] + 1:]
+    replace_at_coord(data, coord, 'O')
 for i, row in enumerate(data):
     print(f'{i+1:<3} | {row}')
 obstacle_count_aft = sum(row.count('#') for row in data)
