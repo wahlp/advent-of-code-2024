@@ -25,7 +25,8 @@ def main(sort_by: SortBy = SortBy.name):
     for script, runtime in data:
         print(f'{script:<15} | {runtime:>9.3f} ms')
     total_runtime = sum(t for _, t in data)
-    print(f'\n{'total':<15} | {total_runtime:>9.3f} ms')
+    print(f'{'-'.ljust(15, '-')}-+-{'-'.rjust(9, '-')}')
+    print(f'{'total':<15} | {total_runtime:>9.3f} ms')
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
