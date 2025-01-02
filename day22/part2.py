@@ -6,15 +6,10 @@ def parse_input(filename):
         data = f.read().splitlines()
     return [int(x) for x in data]
 
-def mix_and_prune(value: int, secret: int):
-    secret = value ^ secret
-    secret = secret % 16777216
-    return secret
-
-def process(secret: int):
-    secret = mix_and_prune(secret * 64, secret)
-    secret = mix_and_prune(secret // 32, secret)
-    secret = mix_and_prune(secret * 2048, secret)
+def process(secret):
+    secret = ((secret * 64) ^ secret) % 16777216
+    secret = ((secret // 32) ^ secret) % 16777216
+    secret = ((secret * 2048) ^ secret) % 16777216
     return secret
 
 def simulate_prices(num: int, steps: int):
